@@ -9,15 +9,15 @@ import java.util.Map;
 public class UsersList {
 
     // Create dictionary <username, client>
-    private Map<String, Client> onlineClient;
+    private Map<String, Server.ClientThread> onlineClient;
 
     // Class Constructor
     public UsersList(){
-        this.onlineClient = new HashMap<String, Client>();
+        this.onlineClient = new HashMap<String, Server.ClientThread>();
     }
 
     // Method which add Client to list
-    public void add(String username, Client client){
+    public void add(String username, Server.ClientThread client){
         if (this.onlineClient.containsKey(username)){
             System.out.println("This username is unavailable.");
             return;
@@ -37,12 +37,19 @@ public class UsersList {
     }
 
     // Method which return array of clients
-    public ArrayList<Client> getClients(){
-        ArrayList<Client> clients = new ArrayList<Client>(this.onlineClient.entrySet().size());
-        for(Map.Entry<String, Client> map: this.onlineClient.entrySet()){
+    public ArrayList<Server.ClientThread> getClients(){
+        ArrayList<Server.ClientThread> clients = new ArrayList<Server.ClientThread>(this.onlineClient.entrySet().size());
+        for(Map.Entry<String, Server.ClientThread> map: this.onlineClient.entrySet()){
             clients.add(map.getValue());
         }
         return clients;
+    }
+
+    public boolean isInList(String username){
+        for(String user: onlineClient.keySet()){
+            if(user.equals(username))return true;
+        }
+        return false;
     }
 
 }

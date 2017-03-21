@@ -2,16 +2,18 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Scanner;
 
 /**
  * Created by dimal on 17.03.2017.
  */
-public class Client {
+public class Client{
 
     // Create field for port and server;
-    private String server;
-    private int port;
+    private static String server = "localhost";
+    private static int port = 1500;
     // Create Socket field
     private Socket socket;
     // Create input stream
@@ -22,9 +24,10 @@ public class Client {
     private String username;
 
     // Constructor for class
-    public Client(String server, int port, String username){
-        this.server = server;
-        this.port = port;
+    public Client(Socket socket, ObjectOutputStream oos, ObjectInputStream ois, String username){
+        this.socket = socket;
+        this.oos = oos;
+        this.ois = ois;
         this.username = username;
     }
 
@@ -39,38 +42,6 @@ public class Client {
         return this.username;
     }
 
-    // Method which try create Client
-    public boolean start(){
-        try {
-            this.socket = new Socket(InetAddress.getLocalHost(), 1500);
-        } catch (UnknownHostException e){
-            e.printStackTrace();
-            return false;
-        } catch (IOException e){
-            e.printStackTrace();
-            return false;
-        }
-
-        new ServerListener().start();
-
-        try {
-            this.oos = new ObjectOutputStream(socket.getOutputStream());
-            this.ois = new ObjectInputStream(socket.getInputStream());
-        } catch (IOException e){
-            System.out.println("Cannot get stream.");
-            e.printStackTrace();
-            return false;
-        }
-
-        try {
-            this.oos.writeObject(username + " was connected.");
-        } catch (IOException e){
-            System.out.println("Cannot send message.");
-            return false;
-        }
-        return true;
-    }
-
     public void sendMessage(Message message){
         try {
             this.oos.writeObject(message);
@@ -78,6 +49,10 @@ public class Client {
             System.out.println("Failed sending message.");
             e.printStackTrace();
         }
+    }
+
+    public void start(){
+        new ServerListener().start();
     }
 
     // Method which try close all connection
@@ -101,15 +76,51 @@ public class Client {
     }
 
     public static void main(String[] args) {
-        Client client = new Client("localhost", 1500, args[0]);
+        Socket socket = null;
+        try {
+            socket = new Socket(InetAddress.getByName(server), port);
+        } catch (UnknownHostException e){
+            e.printStackTrace();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        ObjectInputStream ois = null;
+        ObjectOutputStream oos = null;
+        try {
+            oos = new ObjectOutputStream(socket.getOutputStream());
+            ois = new ObjectInputStream(socket.getInputStream());
+        } catch (IOException e){
+            System.out.println("Cannot get stream.");
+            e.printStackTrace();
+        }
 
-        if(!client.start()) return;
+        boolean incorrect = false;
+        String username = null;
+        do{
+            try {
+                System.out.print("Please enter username: ");
+                username = (new Scanner(System.in)).next();
+                oos.writeObject(username);
+                try {
+                    incorrect = (Boolean) ois.readObject();
+                } catch (ClassNotFoundException e){
+                    e.printStackTrace();
+                }
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+        }while (incorrect && username != null);
+
+        Client client = new Client(socket, oos, ois, username);
+
+        client.start();
 
         Scanner scan = new Scanner(System.in);
         String message;
 
         while (true){
-            message = scan.next();
+            System.out.print("> ");
+            message = scan.nextLine();
             if(message.equals("exit")){
                 break;
             } else {
@@ -122,15 +133,23 @@ public class Client {
 
     public class ServerListener extends Thread{
         public void run(){
-            try {
-                Message message = (Message) ois.readObject();
 
-                System.out.println(message.getUsername() + ": " + message.getMessage() + " (" + message.getDate() + ')');
-                System.out.print("> ");
-            } catch (IOException e){
-                e.printStackTrace();
-            } catch (ClassNotFoundException e){
-                e.printStackTrace();
+            SimpleDateFormat sdf = new SimpleDateFormat("H:m:s");
+            String time;
+
+            while (true) {
+                try {
+                    Message message = (Message) ois.readObject();
+
+                    time = sdf.format(Calendar.getInstance().getTime());
+
+                    System.out.println(message.getUsername() + ": " + message.getMessage() + " (" + time + ')');
+                    System.out.print("> ");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
