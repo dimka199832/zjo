@@ -12,7 +12,7 @@ import java.util.Scanner;
 public class Client{
 
     // Create field for port and server;
-    private static String server = "localhost";
+    private static String server = "localhost"; //139.59.130.172
     private static int port = 1500;
     // Create Socket field
     private Socket socket;
@@ -58,20 +58,20 @@ public class Client{
     // Method which try close all connection
     public void disconnect(){
         try {
+            this.socket.close();
+        } catch (IOException e){
+            System.out.println("Can't close socket.");
+        }
+        try {
             this.oos.close();
         } catch (IOException e){
-            System.out.println("Cannot close output stream.");
+            System.out.println("Can't close output stream.");
             return;
         }
         try {
             this.ois.close();
         } catch (IOException e){
-            System.out.println("Cannot close input stream.");
-        }
-        try {
-            this.socket.close();
-        } catch (IOException e){
-            System.out.println("Cannot close socket.");
+            System.out.println("Can't close input stream.");
         }
     }
 
@@ -90,7 +90,7 @@ public class Client{
             oos = new ObjectOutputStream(socket.getOutputStream());
             ois = new ObjectInputStream(socket.getInputStream());
         } catch (IOException e){
-            System.out.println("Cannot get stream.");
+            System.out.println("Can't get stream.");
             e.printStackTrace();
         }
 
@@ -112,7 +112,9 @@ public class Client{
         }while (incorrect && username != null);
 
         Client client = new Client(socket, oos, ois, username);
-
+        try {
+            oos.writeObject(new Message("Server-bot", username + " connected."));
+        } catch (IOException e){}
         client.start();
 
         Scanner scan = new Scanner(System.in);
@@ -121,10 +123,16 @@ public class Client{
         while (true){
             System.out.print("> ");
             message = scan.nextLine();
-            if(message.equals("exit")){
+            if(message.equals("exit")) {
+                System.out.println("> ");
+                try {
+                    oos.writeObject(new Message("Server-bot", username + " disconnected."));
+                } catch (IOException e){}
+            }
+            client.sendMessage(new Message(client.username, message));
+            //Disable in gui mode
+            if(message.equals("exit")) {
                 break;
-            } else {
-                client.sendMessage(new Message(client.username, message));
             }
         }
 
@@ -141,12 +149,13 @@ public class Client{
                 try {
                     Message message = (Message) ois.readObject();
 
-                    time = sdf.format(Calendar.getInstance().getTime());
+                    time = sdf.format(message.getDate());
 
                     System.out.println(message.getUsername() + ": " + message.getMessage() + " (" + time + ')');
                     System.out.print("> ");
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    System.out.println(username + " disconnected.");
+                    break;
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }

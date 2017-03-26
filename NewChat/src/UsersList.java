@@ -29,11 +29,18 @@ public class UsersList {
     // Method which remove Client from list
     public void remove(String username){
         this.onlineClient.remove(username);
+        for(Map.Entry<String, Server.ClientThread> map : onlineClient.entrySet()){
+            System.out.println(map.getKey() + " " + map.getValue());
+        }
     }
 
     // Method which return array of users
     public String[] getUsers(){
         return this.onlineClient.keySet().toArray(new String[0]);
+    }
+
+    public Map<String, Server.ClientThread> getOnlineClient(){
+        return this.onlineClient;
     }
 
     // Method which return array of clients

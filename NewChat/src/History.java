@@ -23,11 +23,15 @@ public class History implements Serializable{
             this.history.remove(0);
         }
         this.history.add(message);
+        this.size++;
     }
 
     // Getter which return history list
     public List<Message> getHistory(){
         return this.history;
+    }
+    public int getSize(){
+        return this.size;
     }
 
 }

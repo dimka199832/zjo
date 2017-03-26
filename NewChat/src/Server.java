@@ -3,6 +3,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
 
 /**
  * Created by dimal on 18.03.2017.
@@ -10,14 +11,18 @@ import java.net.Socket;
 public class Server {
 
     private UsersList usersList;
+    private History history;
 
     public Server(){
         this.usersList = new UsersList();
+        this.history = new History(50);
     }
 
     private void broadcast(Message message){
-        for(ClientThread ct: usersList.getClients()){
-            ct.sendMessage(message);
+        for(Map.Entry<String, ClientThread> map: usersList.getOnlineClient().entrySet()){
+            if(!message.getUsername().equals(map.getKey())){
+                map.getValue().sendMessage(message);
+            }
         }
     }
 
@@ -32,22 +37,11 @@ public class Server {
                 ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
                 ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
 
-                String username = null;
-                boolean flag;
-                do {
-                    try {
-                        username = (String) ois.readObject();
-                        System.out.println(username);
-                    } catch (ClassNotFoundException e){}
-                    flag = usersList.isInList(username);
-                    oos.writeObject(flag);
-                } while (flag);
                 ClientThread ct = new ClientThread(socket, oos, ois);
-                usersList.add(username, ct);
                 ct.start();
             }
         } catch (IOException e){
-            System.out.println("Cannot create server.");
+            System.out.println("Can't create server.");
             e.printStackTrace();
         }
 
@@ -71,13 +65,57 @@ public class Server {
         }
 
         public void run(){
+
             try{
-                while (true) {
-                    Message message = (Message) ois.readObject();
-                    broadcast(message);
+                String username = null;
+                boolean flag;
+                do {
+                    try {
+                        username = (String) ois.readObject();
+                        System.out.println(username);
+                    } catch (ClassNotFoundException e){}
+                    flag = usersList.isInList(username);
+                    oos.writeObject(flag);
+                } while (flag);
+
+                usersList.add(username, this);
+
+                for (Message message : history.getHistory()) {
+                    oos.writeObject(message);
                 }
+
+                while (true) {
+                    if(socket.isConnected()) {
+                        Message message = (Message) ois.readObject();
+                        if (message.getMessage().equals("exit")) {
+                            break;
+                        }
+                        history.add(message);
+                        broadcast(message);
+                    }else break;
+                }
+                usersList.remove(username);
+                close();
             } catch (ClassNotFoundException e){
                 e.printStackTrace();
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+
+        public void close(){
+            try {
+                if(socket != null) socket.close();
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+            try {
+                if(ois != null) ois.close();
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+            try {
+                if(oos != null) oos.close();
             } catch (IOException e){
                 e.printStackTrace();
             }

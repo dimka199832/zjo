@@ -40,7 +40,7 @@ public class Message implements Serializable {
     public String[] getUsers(){
         return this.users;
     }
-    public String getDate(){
-        return new Date(this.time.getTime()).toString();
+    public Date getDate(){
+        return this.time;
     }
 }
