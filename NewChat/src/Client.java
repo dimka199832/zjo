@@ -1,10 +1,8 @@
+import javax.swing.*;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Scanner;
 
 /**
  * Created by dimal on 17.03.2017.
@@ -22,13 +20,41 @@ public class Client{
     private ObjectOutputStream oos;
     // Create field username
     private String username;
+    //private static ChatWindow window;
+    private ChatWindow window;
+    // Server Listener
+    private ServerListener serverListener;
 
     // Constructor for class
-    public Client(Socket socket, ObjectOutputStream oos, ObjectInputStream ois, String username){
-        this.socket = socket;
-        this.oos = oos;
-        this.ois = ois;
-        this.username = username;
+    public Client(){
+        this.window = null;
+        try {
+            this.socket = new Socket(InetAddress.getByName(server), port);
+            this.oos = new ObjectOutputStream(socket.getOutputStream());
+            this.ois = new ObjectInputStream(socket.getInputStream());
+        } catch (IOException e){
+            System.out.println("Error creating client");
+        }
+    }
+
+    public boolean setUsername(String username){
+        boolean incorrect = false;
+        if(username != null) this.username = username;
+        try {
+            oos.writeObject(this.username);
+            try {
+                incorrect = (Boolean) ois.readObject();
+            } catch (ClassNotFoundException e){
+                e.printStackTrace();
+            }
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        return incorrect;
+    }
+
+    public void setWindow(ChatWindow window){
+        this.window = window;
     }
 
     // Getters
@@ -50,13 +76,51 @@ public class Client{
             e.printStackTrace();
         }
     }
+    public Message getMessage(){
+        try {
+            Message message = (Message) ois.readObject();
+            return message;
+        } catch (IOException e){
+            System.out.println("Error can't get message");
+        } catch (ClassNotFoundException e){
+            System.out.println("Unexpected class");
+        }
+        return null;
+    }
 
     public void start(){
-        new ServerListener().start();
+
+        try {
+            oos.writeObject(new Message(username, username + " connected.", Message.INFO));
+        }catch (IOException e){
+            System.out.println("Can't send message.");
+        }
+
+        Message message = null;
+        try {
+            message = (Message) ois.readObject();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if(message != null){
+            for(String user: (String[])message.getData())
+                window.addUserToList(user);
+        }
+
+
+        serverListener = new ServerListener();
+        serverListener.start();
     }
 
     // Method which try close all connection
     public void disconnect(){
+        try {
+            oos.writeObject(new Message(username, username + " disconnected.", Message.DISCONNECT));
+        } catch (IOException e){
+            JOptionPane.showMessageDialog(null, "Error can't disconnect from server");
+        }
         try {
             this.socket.close();
         } catch (IOException e){
@@ -70,94 +134,40 @@ public class Client{
         }
         try {
             this.ois.close();
-        } catch (IOException e){
+        } catch (IOException e) {
             System.out.println("Can't close input stream.");
         }
-    }
-
-    public static void main(String[] args) {
-        Socket socket = null;
-        try {
-            socket = new Socket(InetAddress.getByName(server), port);
-        } catch (UnknownHostException e){
-            e.printStackTrace();
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-        ObjectInputStream ois = null;
-        ObjectOutputStream oos = null;
-        try {
-            oos = new ObjectOutputStream(socket.getOutputStream());
-            ois = new ObjectInputStream(socket.getInputStream());
-        } catch (IOException e){
-            System.out.println("Can't get stream.");
-            e.printStackTrace();
-        }
-
-        boolean incorrect = false;
-        String username = null;
-        do{
-            try {
-                System.out.print("Please enter username: ");
-                username = (new Scanner(System.in)).next();
-                oos.writeObject(username);
-                try {
-                    incorrect = (Boolean) ois.readObject();
-                } catch (ClassNotFoundException e){
-                    e.printStackTrace();
-                }
-            } catch (IOException e){
-                e.printStackTrace();
-            }
-        }while (incorrect && username != null);
-
-        Client client = new Client(socket, oos, ois, username);
-        try {
-            oos.writeObject(new Message("Server-bot", username + " connected."));
-        } catch (IOException e){}
-        client.start();
-
-        Scanner scan = new Scanner(System.in);
-        String message;
-
-        while (true){
-            System.out.print("> ");
-            message = scan.nextLine();
-            if(message.equals("exit")) {
-                System.out.println("> ");
-                try {
-                    oos.writeObject(new Message("Server-bot", username + " disconnected."));
-                } catch (IOException e){}
-            }
-            client.sendMessage(new Message(client.username, message));
-            //Disable in gui mode
-            if(message.equals("exit")) {
-                break;
-            }
-        }
-
-        client.disconnect();
     }
 
     public class ServerListener extends Thread{
         public void run(){
 
-            SimpleDateFormat sdf = new SimpleDateFormat("H:m:s");
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
             String time;
 
             while (true) {
-                try {
-                    Message message = (Message) ois.readObject();
-
+                Message message = getMessage();
+                if(message != null) {
                     time = sdf.format(message.getDate());
 
-                    System.out.println(message.getUsername() + ": " + message.getMessage() + " (" + time + ')');
-                    System.out.print("> ");
-                } catch (IOException e) {
-                    System.out.println(username + " disconnected.");
-                    break;
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                    if (message.getType() == Message.MESSAGE) {
+                        window.addText(message.getUsername() + ": " +
+                                message.getData() + " (" + time + ")");
+                    }
+                    if (message.getType() == Message.INFO) {
+                        window.addText(message.getData() + " (" + time + ")");
+                    }
+                    if (message.getType() == Message.CONFIG){
+                        window.addUserToList((String) message.getData());
+                    }
+                    if (message.getType() == Message.DISCONNECT){
+                        window.removeUserFromList(message.getUsername());
+                    }
+
+                }else {
+                    if(socket.isClosed()){
+                        break;
+                    }
                 }
             }
         }

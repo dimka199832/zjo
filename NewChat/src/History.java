@@ -30,8 +30,5 @@ public class History implements Serializable{
     public List<Message> getHistory(){
         return this.history;
     }
-    public int getSize(){
-        return this.size;
-    }
 
 }
