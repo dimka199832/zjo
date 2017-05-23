@@ -1,0 +1,15 @@
+<hibernate-mapping>
+    <class name="logic.User" table="user">
+        <id name="Id" column="Id" type="java.lang.Long">
+            <generator class="increment"/>
+        </id>
+
+        <set name="Groups" table="idgroup" lazy="true">
+            <key column="IdGroup"/>
+            <many-to-many column="IdGroup" class="logic.ChatGroup"/>
+        </set>
+        <property name="Login"      column="Login"      type="java.lang.String"/>
+        <property name="Password"   column="Password"   type="java.lang.String"/>
+        <one-to-one name="Info" class="logic.UserInfo" cascade="save-update"/>
+    </class>
+</hibernate-mapping>
