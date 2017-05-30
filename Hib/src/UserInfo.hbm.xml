@@ -1,10 +1,12 @@
-<hibernate-mapping>
+<hibernate-mapping xmlns="http://www.hibernate.org/xsd/hibernate-mapping"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.hibernate.org/xsd/hibernate-mapping http://www.hibernate.org/xsd/hibernate-mapping">
     <class name="logic.UserInfo" table="userinfo">
         <id column="Id_User" name="Id" type="java.lang.Long"/>
 
-        <property column="FullName" name="FullName" type="java.lang.String" />
-        <property column="Age"      name="Age"      type="java.lang.Integer"/>
-        <property column="Gender"   name="Gender"   type="java.lang.String" />
+        <property column="FullName" name="FullName" type="java.lang.String"/>
+        <property column="Age" name="Age" type="java.lang.Integer"/>
+        <property column="Gender" name="Gender" type="java.lang.String"/>
         <one-to-one name="Person" class="logic.User" constrained="true"/>
     </class>
 </hibernate-mapping>

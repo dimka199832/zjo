@@ -7,10 +7,13 @@ import org.hibernate.cfg.Configuration;
  * Created by dimal on 23.05.2017.
  */
 public class HibernateUtil {
-    private static final SessionFactory SessionFactory;
+    private static final SessionFactory sessionFactory;
+
+    private HibernateUtil(){}
+
     static{
         try {
-            SessionFactory = new Configuration().configure().buildSessionFactory();
+            sessionFactory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory();
         } catch (Throwable ex){
             System.err.println("Initial SessionFactory creation failed." + ex);
             throw new ExceptionInInitializerError(ex);
@@ -18,6 +21,6 @@ public class HibernateUtil {
     }
 
     public static SessionFactory getSessionFactory(){
-        return SessionFactory;
+        return sessionFactory;
     }
 }

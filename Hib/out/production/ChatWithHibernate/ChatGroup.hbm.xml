@@ -1,12 +1,14 @@
-<hibernate-mapping>
+<hibernate-mapping xmlns="http://www.hibernate.org/xsd/hibernate-mapping"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.hibernate.org/xsd/hibernate-mapping http://www.hibernate.org/xsd/hibernate-mapping">
     <class name="logic.ChatGroup" table="chatgroup">
         <id name="Id" column="Id" type="java.lang.Long">
             <generator class="increment"/>
         </id>
 
         <set name="Users" table="idgroup" lazy="true">
-            <key column="IdUser"/>
-            <many-to-many column="IdUser" class="logic.User"/>
+            <key column="IdGroup"/>
+            <many-to-many column="Id" class="logic.User"/>
         </set>
         <property name="Msg" column="Message" type="java.lang.String"/>
     </class>

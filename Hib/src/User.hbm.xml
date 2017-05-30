@@ -1,15 +1,17 @@
-<hibernate-mapping>
+<hibernate-mapping xmlns="http://www.hibernate.org/xsd/hibernate-mapping"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.hibernate.org/xsd/hibernate-mapping http://www.hibernate.org/xsd/hibernate-mapping">
     <class name="logic.User" table="user">
         <id name="Id" column="Id" type="java.lang.Long">
             <generator class="increment"/>
         </id>
 
         <set name="Groups" table="idgroup" lazy="true">
-            <key column="IdGroup"/>
-            <many-to-many column="IdGroup" class="logic.ChatGroup"/>
+            <key column="IdUser"/>
+            <many-to-many column="Id" class="logic.ChatGroup"/>
         </set>
-        <property name="Login"      column="Login"      type="java.lang.String"/>
-        <property name="Password"   column="Password"   type="java.lang.String"/>
+        <property name="Login" column="Login" type="java.lang.String"/>
+        <property name="Password" column="Password" type="java.lang.String"/>
         <one-to-one name="Info" class="logic.UserInfo" cascade="save-update"/>
     </class>
 </hibernate-mapping>

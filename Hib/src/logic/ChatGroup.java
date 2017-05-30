@@ -17,7 +17,7 @@ public class ChatGroup {
         this.Id = Id;
     }
 
-    public void setIdUsers(Set<Long> Users){
+    public void setUsers(Set<Long> Users){
         this.Users = Users;
     }
 
