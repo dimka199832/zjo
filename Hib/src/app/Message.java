@@ -46,7 +46,7 @@ public class Message implements Serializable {
     public boolean toUser(String username){
         if(users == null) return false;
         for(String user : users){
-            if(user.equals(username) || this.username == username) return true;
+            if(user.equals(username) || this.username.equals(username)) return true;
         }
         return false;
     }

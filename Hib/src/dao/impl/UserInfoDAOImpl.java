@@ -3,6 +3,7 @@ package dao.impl;
 import dao.UserInfoDAO;
 import logic.UserInfo;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 import util.HibernateUtil;
 
 import javax.swing.*;
@@ -15,14 +16,16 @@ public class UserInfoDAOImpl implements UserInfoDAO{
     @Override
     public void addUserInfo(UserInfo info) throws SQLException {
         Session session = null;
+        Transaction transaction = null;
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
+            transaction = session.beginTransaction();
             session.save(info);
-            session.getTransaction().commit();
+            transaction.commit();
         } catch (Exception e){
             JOptionPane.showMessageDialog(null, e.getMessage(), "Inserting Error",
                     JOptionPane.OK_OPTION);
+            transaction.rollback();
         } finally {
             if(session != null && session.isOpen()){
                 session.close();
@@ -33,14 +36,16 @@ public class UserInfoDAOImpl implements UserInfoDAO{
     @Override
     public void updateUserInfo(long id, UserInfo info) throws SQLException {
         Session session = null;
+        Transaction transaction = null;
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
+            transaction = session.beginTransaction();
             session.update(info);
-            session.getTransaction().commit();
+            transaction.commit();
         } catch (Exception e){
             JOptionPane.showMessageDialog(null, e.getMessage(), "Inserting Error",
                     JOptionPane.OK_OPTION);
+            transaction.rollback();
         } finally {
             if(session != null && session.isOpen()){
                 session.close();
@@ -69,14 +74,16 @@ public class UserInfoDAOImpl implements UserInfoDAO{
     @Override
     public void deleteUser(UserInfo info) throws SQLException {
         Session session = null;
+        Transaction transaction = null;
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
+            transaction = session.beginTransaction();
             session.delete(info);
-            session.getTransaction().commit();
+            transaction.commit();
         } catch (Exception e){
             JOptionPane.showMessageDialog(null, e.getMessage(), "Inserting Error",
                     JOptionPane.OK_OPTION);
+            transaction.rollback();
         } finally {
             if(session != null && session.isOpen()){
                 session.close();

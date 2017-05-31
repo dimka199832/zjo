@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat;
 public class Client{
 
     // Create field for port and server;
-    private static String server = "localhost"; //139.59.130.172
+    private static String server = "139.59.130.172"; //139.59.130.172
     private static int port = 1500;
     // Create Socket field
     private Socket socket;

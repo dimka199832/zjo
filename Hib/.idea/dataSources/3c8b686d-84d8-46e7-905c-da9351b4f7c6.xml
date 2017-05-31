@@ -15,64 +15,85 @@
     <table id="9" parent="2" name="idgroup"/>
     <table id="10" parent="2" name="user"/>
     <table id="11" parent="2" name="userinfo"/>
-    <column id="12" parent="8" name="Id">
-      <Position>1</Position>
-      <DataType>bigint(20)|0</DataType>
-      <NotNull>1</NotNull>
-    </column>
-    <column id="13" parent="8" name="Message">
+    <column id="12" parent="8" name="Message">
       <Position>2</Position>
       <DataType>text|0</DataType>
     </column>
+    <column id="13" parent="8" name="Id_Group">
+      <Position>1</Position>
+      <DataType>bigint(20)|0</DataType>
+      <NotNull>1</NotNull>
+    </column>
     <index id="14" parent="8" name="idx_chatgroup_Id">
-      <ColNames>Id</ColNames>
+      <ColNames>Id_Group</ColNames>
       <Unique>1</Unique>
     </index>
     <key id="15" parent="8" name="idx_chatgroup_Id">
-      <ColNames>Id</ColNames>
+      <ColNames>Id_Group</ColNames>
       <UnderlyingIndexName>idx_chatgroup_Id</UnderlyingIndexName>
     </key>
-    <column id="16" parent="9" name="IdUser">
+    <column id="16" parent="9" name="Id_User">
       <Position>1</Position>
       <DataType>bigint(20)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="17" parent="9" name="IdGroup">
+    <column id="17" parent="9" name="Id_Group">
       <Position>2</Position>
       <DataType>bigint(20)|0</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="18" parent="10" name="Id">
-      <Position>1</Position>
-      <DataType>bigint(20)|0</DataType>
-      <NotNull>1</NotNull>
-    </column>
-    <column id="19" parent="10" name="Login">
-      <Position>2</Position>
-      <DataType>varchar(20)|0</DataType>
-    </column>
-    <column id="20" parent="10" name="Password">
+    <column id="18" parent="10" name="Login">
       <Position>3</Position>
       <DataType>varchar(20)|0</DataType>
     </column>
-    <key id="21" parent="10" name="PRIMARY">
+    <column id="19" parent="10" name="Password">
+      <Position>4</Position>
+      <DataType>varchar(20)|0</DataType>
+    </column>
+    <column id="20" parent="10" name="Id_User">
+      <Position>1</Position>
+      <DataType>bigint(20)|0</DataType>
+      <NotNull>1</NotNull>
+      <SequenceIdentity>1</SequenceIdentity>
+    </column>
+    <column id="21" parent="10" name="Id_UserInfo">
+      <Position>2</Position>
+      <DataType>bigint(20)|0</DataType>
+    </column>
+    <index id="22" parent="10" name="user_Id_User_uindex">
+      <ColNames>Id_User</ColNames>
+      <Unique>1</Unique>
+    </index>
+    <index id="23" parent="10" name="user_Id_UserInfo_uindex">
+      <ColNames>Id_UserInfo</ColNames>
+      <Unique>1</Unique>
+    </index>
+    <key id="24" parent="10" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
-      <ColNames>Id</ColNames>
+      <ColNames>Id_User</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="22" parent="11" name="FullName">
+    <key id="25" parent="10" name="user_Id_User_uindex">
+      <ColNames>Id_User</ColNames>
+      <UnderlyingIndexName>user_Id_User_uindex</UnderlyingIndexName>
+    </key>
+    <key id="26" parent="10" name="user_Id_UserInfo_uindex">
+      <ColNames>Id_UserInfo</ColNames>
+      <UnderlyingIndexName>user_Id_UserInfo_uindex</UnderlyingIndexName>
+    </key>
+    <column id="27" parent="11" name="FullName">
       <Position>2</Position>
       <DataType>varchar(40)|0</DataType>
     </column>
-    <column id="23" parent="11" name="Age">
+    <column id="28" parent="11" name="Age">
       <Position>3</Position>
       <DataType>int(11)|0</DataType>
     </column>
-    <column id="24" parent="11" name="Gender">
+    <column id="29" parent="11" name="Gender">
       <Position>4</Position>
       <DataType>varchar(5)|0</DataType>
     </column>
-    <column id="25" parent="11" name="Id_User">
+    <column id="30" parent="11" name="Id_UserInfo">
       <Position>1</Position>
       <DataType>bigint(20)|0</DataType>
       <NotNull>1</NotNull>
